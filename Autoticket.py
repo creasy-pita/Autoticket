@@ -147,18 +147,20 @@ class Concert(object):
                 datelist = calendar.find_elements_by_css_selector("[class='wh_content_item']") # 找到能选择的日期
                 datelist = datelist[7:] # 跳过前面7个表示周一~周日的元素
                 datelist[self.date - 1].click() # 选择对应日期
-            
-            selects = self.driver.find_elements_by_class_name('perform__order__select')
+            print("###perform__order__select###")
+            # selects = self.driver.find_elements_by_class_name('perform__order__select')
+            selects = self.driver.find_elements(By.CLASS_NAME, 'perform__order__select');
+            print("###perform__order__select###")
             # print('可选区域数量为：{}'.format(len(selects)))
             for item in selects:
-                if item.find_element_by_class_name('select_left').text == '场次':
+                if item.find_element(By.CLASS_NAME,'select_left').text == '场次':
                     session = item
                     # print('\t场次定位成功')
-                elif item.find_element_by_class_name('select_left').text == '票档':
+                elif item.find_element(By.CLASS_NAME,'select_left').text == '票档':
                     price = item
                     # print('\t票档定位成功')
 
-            session_list = session.find_elements_by_class_name('select_right_list_item')
+            session_list = session.find_elements(By.CLASS_NAME,'select_right_list_item')
             print('可选场次数量为：{}'.format(len(session_list)))
             if len(self.session) == 1:
                 j = session_list[self.session[0] - 1].click()
@@ -176,7 +178,11 @@ class Concert(object):
                         j.click()
                         break
 
-            price_list = price.find_elements_by_class_name('select_right_list_item')
+            price_list = price.find_elements(By.CLASS_NAME,'select_right_list_item')
+            while len(price_list) == 0:
+                sleep(0.01)
+                print('可选票档数量为0,等待0.01秒让其加载票档')
+                price_list = price.find_elements(By.CLASS_NAME,'select_right_list_item')
             print('可选票档数量为：{}'.format(len(price_list)))
             if len(self.price) == 1:
                 j = price_list[self.price[0] - 1].click()
@@ -189,10 +195,21 @@ class Concert(object):
                     else:
                         j.click()
                         break
+            #  2023-05-14 buybutton 没有了，改用了 buy-link
+            # buybutton = self.driver.find_element(By.CLASS_NAME,'buybtn')
+            # buybutton_text = buybutton.text
+            # # print(buybutton_text)
+            buymode = 0;
+            try:
+                buybutton = self.driver.find_element(By.CLASS_NAME,'buybtn')
+            except:
+                buymode = 1;
+                print("没有找到购买按钮")
 
-            buybutton = self.driver.find_element_by_class_name('buybtn')
-            buybutton_text = buybutton.text
-            # print(buybutton_text)
+            if buymode == 1:
+                buybutton = self.driver.find_element(By.CLASS_NAME,'buy-link')
+                buybutton_text = "立即预订"
+
             
             def add_ticket(): # 设置增加票数
                 try:
